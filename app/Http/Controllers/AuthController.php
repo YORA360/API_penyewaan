@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 
 class AuthController extends Controller
@@ -53,26 +55,32 @@ class AuthController extends Controller
         ]);
     
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 400);
-        }
-
-           if ($validator->fails()) {
-            $response = array(
+            return response()->json([
                 'success' => false,
                 'message' => 'Failed to login. Please check your input data',
-                'data' => null,
                 'errors' => $validator->errors()
-            );
-
-            return response()->json($response, 400);
+            ], 400);
         }
     
         $credentials = $request->only('email', 'password');
-        if (!$token = auth("api")->attempt($credentials)) {
-            return response()->json(['success' => false, 'message' => 'Invalid credentials'], 400);
-        }
     
-        return response()->json(['success' => true, 'access_token' => $token], 200);
+        try {
+            if (!$token = auth('api')->setTTL(60)->attempt($credentials)) {
+                return response()->json(['success' => false, 'message' => 'Invalid credentials'], 400);
+            }
+            
+            $refreshToken = JWTAuth::claims(['exp' => now()->addHours(4)->timestamp])->fromUser(auth('api')->user());
+    
+            return response()->json([
+                'success' => true,
+                'access_token' => $token,
+                'expires_in' => 3600, // 1 jam
+                'refresh_token' => $refreshToken,
+                'refresh_expires_in' => 14400 // 4 jam
+            ], 200);
+        } catch (JWTException $e) {
+            return response()->json(['success' => false, 'message' => 'Could not create token'], 500);
+        }
     }
 
     public function forgotPassword(Request $request)

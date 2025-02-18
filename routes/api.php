@@ -27,12 +27,15 @@ Route::get('/reset-password/{token}', function ($token) {
     return response()->json(['token' => $token, 'message' => 'Use this token to reset password']);
 })->name('password.reset');
 
+
+Route::apiResource('/alat', AlatController::class);
+Route::apiResource('/kategori', KategoriController::class);
 Route::group(['middleware' => 'auth:api'], function(){
     Route::post('/auth/refresh', [AuthController::class, 'refreshToken']);
-    Route::apiResource('/kategori', KategoriController::class);
+
     Route::apiResource('/data/pelanggan', PelangganDataController::class);
     Route::apiResource('/pelanggan', PelangganController::class);
     Route::apiResource('/detail/penyewaan', PenyewaanDetailController::class);
     Route::apiResource('/penyewaan', PenyewaanController::class);
-    Route::apiResource('/alat', AlatController::class);
+  
 });

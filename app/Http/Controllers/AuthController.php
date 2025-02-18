@@ -102,13 +102,15 @@ class AuthController extends Controller
         ['token' => $token, 'created_at' => now()]
     );
 
+    $resetUrl = "http://ayopinjam-final-project-frontend-advanced.vercel.app/reset-password?token=$token"; 
+
     // Kirim email dengan token langsung
-  Mail::raw("Gunakan token berikut untuk mereset password Anda: $token", function ($message) use ($request) {
+    Mail::raw("Klik link berikut untuk mereset password Anda: $resetUrl", function ($message) use ($request) {
         $message->to($request->email)
-                ->subject('Reset Password Token');
+                ->subject('Reset Password');
     });
 
-    return response()->json(['message' => 'Token reset password telah dikirim ke email Anda', 'token' => $token]);
+    return response()->json(['message' => 'Reset link has been sent to your email', 'reset_url' => $resetUrl]);
 }
 public function resetPassword(Request $request)
 {

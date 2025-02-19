@@ -76,7 +76,7 @@ class PelangganController extends Controller
             'pelanggan_nama' => 'required|string|max:100',
             'pelanggan_nama' => 'required|string',
             'pelanggan_alamat' => 'required|string',
-            'pelanggan_noTelp' => 'required|char',
+            'pelanggan_noTelp' => 'required|digits_between:10,15',
             'pelanggan_email' => 'required|string',
             
         ]);
